@@ -7,7 +7,13 @@ WITH
     s1, COLLECT(DISTINCT COALESCE(similar1, s1)) AS semGroup1,
     s2, COLLECT(DISTINCT COALESCE(similar2, s2)) AS semGroup2,
     s3, COLLECT(DISTINCT COALESCE(similar3, s3)) AS semGroup3
-WITH semGroup1, semGroup2, semGroup3, COUNT(*) AS frequency
-WHERE frequency > 1
-RETURN semGroup1, semGroup2, semGroup3, frequency
+MATCH (p:PROCESS)-[:HAS_STEP]->(s1)
+WITH semGroup1, semGroup2, semGroup3, COLLECT(DISTINCT p) AS processNodes, COUNT(*) AS frequency
+WHERE frequency > 25
+RETURN 
+    [x IN semGroup1 | x.name] AS semGroupName1,
+    [x IN semGroup2 | x.name] AS semGroupName2,
+    [x IN semGroup3 | x.name] AS semGroupName3,
+    frequency,
+    [x IN processNodes | x.id] AS processes 
 ORDER BY frequency DESC
