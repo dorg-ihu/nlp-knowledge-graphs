@@ -90,4 +90,98 @@ docker pull neo4jlabs/neodash:latest
 docker run -it --rm -p 5005:5005 neo4jlabs/neodash
 ```
 
+- [ ] Create the dashboard and save it to Neo4j with a name
+
+
+## Setup of NeoDash Dashboard
+- [ ] Run the following docker command
+
+```
+sudo docker run  -it --rm -p 5005:5005 \
+    -e standalone=true \
+    -e standaloneProtocol="bolt" \
+    -e standaloneHost="83.212.74.185" \
+    -e standalonePort="7687" \
+    -e standaloneDatabase="neo4j" \
+    -e standaloneDashboardName="WP5 Dashboard" \
+    -e standaloneDashboardDatabase="neo4j" \
+	-e standaloneUsername="neo4j" \
+	-e standalonePassword="mCsh0U377QDQZSENUaOp" \
+    neo4jlabs/neodash
+```
+
+
+## Setup Neo4j and NeoDash with SSL
+### Obtain SSL certificate
+Use Certbot to obtain an SSL certificate from Let's Encrypt:
+
+```
+sudo apt-get update
+sudo apt-get install certbot
+sudo certbot certonly --standalone -d <yourdomain.com>
+```
+
+The certificates will be stored in `/etc/letsencrypt/live/<yourdomain.com>/`
+It should be the public key for the certificate (fullchain.pem) and the private key (privkey.pem)
+
+### Setup Neo4j with SSL
+- [ ] Update the neo4j.conf by using the content from this repo's config/neo4j_ssl.conf file.
+- [ ] Provide the necessary permissions for neo4j service:
+
+```
+sudo chown neo4j:neo4j /var/lib/neo4j/certificates/privkey.pem
+sudo chown neo4j:neo4j /var/lib/neo4j/certificates/cert.pem
+
+sudo chmod 640 /var/lib/neo4j/certificates/privkey.pem
+sudo chmod 644 /var/lib/neo4j/certificates/cert.pem
+```
+
+- [ ] Verify the ownership and permissions: Check the permissions to ensure they are set correctly.
+
+```
+ls -l /var/lib/neo4j/certificates/
+```
+
+- [ ] Copy certificate and private key to `/var/lib/neo4j/certificates`
+
+- [ ] Restart Neo4j service
+
+```
+sudo systemctl restart neo4j
+```
+
+- [ ] Verify Neo4j logs
+
+```
+sudo journalctl -u neo4j -f
+```
+
+
+### Setup NeoDash with SSL
+
+- [ ] Git clone [NeoDash repo](https://github.com/neo4j-labs/neodash) to the user directory.
+
+- [ ] Go to the NeoDash folder and create a new folder ssl. Copy and paste there the certificate and private key.
+
+- [ ] Update the file `conf/default.conf.template` with the one of this repo's `config/default.conf.template`.
+
+- [ ] Update the file `Dockerfile` with the one of this repo's `config/Dockerfile`
+
+- [ ] Run the following command to launch the dashboard:
+
+```
+sudo docker run  -it --rm -p 80:80 -p 443:443 \
+    -e standalone=true \
+    -e standaloneProtocol="bolt+s" \
+    -e standaloneHost="snf-38220.ok-kno.grnetcloud.net" \
+    -e standalonePort="7687" \
+    -e standaloneDatabase="neo4j" \
+    -e standaloneDashboardName="WP5 Dashboard" \
+    -e standaloneDashboardDatabase="neo4j" \
+	-e standaloneUsername="neo4j" \
+	-e standalonePassword="<neo4j_password>" \
+    --name neodash-container neodash-ssl
+```
+
+- [ ] Access the dashboard on https://snf-38220.ok-kno.grnetcloud.net
 
