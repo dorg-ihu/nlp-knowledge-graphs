@@ -106,7 +106,7 @@ sudo docker run  -it --rm -p 5005:5005 \
     -e standaloneDashboardName="WP5 Dashboard" \
     -e standaloneDashboardDatabase="neo4j" \
 	-e standaloneUsername="neo4j" \
-	-e standalonePassword="mCsh0U377QDQZSENUaOp" \
+	-e standalonePassword="<neo4j_password>" \
     neo4jlabs/neodash
 ```
 
